@@ -1,0 +1,12 @@
+node_modules/
+*/node_modules/
+package-lock.json
+*/package-lock.json
+.DS_Store
+*.log
+.env
+dist/
+build/
+# Local viva notes (kept private so professors don't see)
+*VIVA*.md
+*viva*.md
