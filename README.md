@@ -1,110 +1,135 @@
-# 🎂 Cake Delight - Microservices Application
+# Cake Delight - Cloud Native Microservices Application
 
-**Cloud Native Microservices Engineering Capstone Project**  
-**Student:** Polipireedi Rohith Kumar  
-
----
-
-## 📌 1. Project Overview
-
-**Cake Delight** is an e-commerce cake application built using a **Microservices Architecture**.  
-Instead of one large monolithic program, it is split into **5 independent services**:
-
-1. **API Gateway (`Port 3000`):** Single entry point for the browser. Routes requests to backend services.
-2. **Cake Catalog Service (`Port 3001`):** Stores cakes and filters them by name, category, and price.
-3. **Order & Basket Service (`Port 3002`):** Manages the cart, creates orders at checkout, and fires the order event.
-4. **Rating Service (`Port 3003`):** Submits ratings (1–5 stars) and calculates the average rating.
-5. **Notification Service (`Port 3004`):** Listens for order events and confirms delivery.
+**Capstone Project:** Cloud Native Microservices Engineering  
+**Candidate Name:** Polipireedi Rohith Kumar  
+**Target Role:** Advanced Application Software Engineer (AASE)  
+**Company:** Accenture  
 
 ---
 
-## 🏗️ 2. Architecture Diagram
+## 1. Project Overview
+
+**Cake Delight** is an enterprise-grade, cloud-native microservices application designed around the **12-Factor App methodology**. It provides an end-to-end e-commerce customer journey: browsing artisan cakes, applying multi-attribute filters, managing shopping cart operations, completing checkout, processing asynchronous notifications, and submitting customer reviews.
+
+The solution addresses core engineering concerns expected of an **Advanced Application Software Engineer**:
+- **Domain-Driven Service Boundaries:** 4 core business microservices + 1 API Gateway.
+- **Database-per-Service Pattern:** Isolated, service-owned persistence stores.
+- **Loose Coupling & Event-Driven Architecture:** Asynchronous order confirmation event processing.
+- **Resilience & Fault Tolerance:** Automatic fallback handling and Kubernetes health probes.
+- **Containerization & Orchestration:** Lightweight Docker packaging and production-ready Kubernetes manifests.
+
+---
+
+## 2. Microservices Architecture
 
 ```
-                 [ Web Browser / Client ]
-                            │
-                            │ (Port 3000)
-                            ▼
-                  [ API Gateway :3000 ]
-              ┌─────────────┼─────────────┐
-              │             │             │
-              ▼             ▼             ▼
-       [ Catalog :3001 ] [ Order :3002 ] [ Rating :3003 ]
-                            │
-                            │ (Order Completed Event)
-                            ▼
-                    [ Notification :3004 ]
+                    +--------------------------------+
+                    |    Client Browser / Web UI     |
+                    +--------------------------------+
+                                   | (Port 3000)
+                                   v
+                    +--------------------------------+
+                    |       API Gateway (:3000)      |
+                    |    Reverse Proxy & Routing     |
+                    +--------------------------------+
+                      /            |            \
+                     /             |             \
+       /api/catalog /   /api/order |   \api/rating\
+                   v               v               v
+            +------------+  +------------+  +------------+
+            |  Catalog   |  |   Order    |  |   Rating   |
+            |  Service   |  |  Service   |  |  Service   |
+            |  (:3001)   |  |  (:3002)   |  |  (:3003)   |
+            +------------+  +------------+  +------------+
+                                   |
+                                   | Order Completed Event (Async)
+                                   v
+                            +------------+
+                            |Notification|
+                            |  Service   |
+                            |  (:3004)   |
+                            +------------+
 ```
 
 ---
 
-## 🚀 3. How to Run the Project (Easiest Way)
+## 3. Microservices Summary
 
-### Step 1: Start All Services
-Open PowerShell / Terminal in this project folder and run:
+| Microservice | Port | Key Responsibilities | Primary Endpoints |
+|---|---|---|---|
+| **API Gateway** | `3000` | Single entry point, reverse proxy routing, hosts Client Web UI | `/*`, `/api/*`, `/health` |
+| **Cake Catalog** | `3001` | Product catalog, multi-attribute filtering (name, category, price) | `GET /cakes`, `GET /cakes/:id`, `GET /categories` |
+| **Order & Basket** | `3002` | Shopping basket operations, order checkout, event publishing | `GET /basket`, `POST /basket/items`, `POST /checkout`, `GET /orders` |
+| **Rating Service** | `3003` | Customer reviews, dynamic average score calculation | `POST /ratings`, `GET /ratings/:cakeId` |
+| **Notification** | `3004` | Event listener, order confirmation processing, delivery logging | `POST /events/order-completed`, `GET /notifications` |
+
+---
+
+## 4. How to Run the Application
+
+### Option A: Local Execution (Recommended for Live Demo)
 ```bash
+# 1. Start all microservices concurrently
 npm start
+
+# 2. Open Web Application
+http://localhost:3000
 ```
 
-### Step 2: Open in Browser
-Open: **`http://localhost:3000`**
-
----
-
-## 🎬 4. Step-by-Step Demo Script (What to Show in Viva)
-
-When professors ask you to show the demo, follow these **5 simple steps on screen**:
-
-### Step 1: Show Catalog & Filter (Catalog Service :3001)
-- Open `http://localhost:3000`.
-- In the **Category dropdown**, select **"Chocolate"**.
-- Point to the screen and say:  
-  > *"Here you can see the catalog filtering in real time. The request goes to the Catalog Microservice on port 3001."*
-
-### Step 2: Add to Basket (Order Service :3002)
-- Click the **"+ Add"** button on **Chocolate Truffle** and **Red Velvet**.
-- Show the right side under **"Shopping Basket"**.
-- Point to the total and say:  
-  > *"The Order Microservice on port 3002 manages cart items in its own database and calculates the total plus delivery fee."*
-
-### Step 3: Complete Checkout & Trigger Event
-- Click the red **"Complete Checkout"** button.
-- You will see: `✅ Order ORD-... Confirmed! Total: ₹...`
-- Say to the professor:  
-  > *"When checkout completes, the Order Service creates an order record and publishes an asynchronous event."*
-
-### Step 4: Show Live Notification (Notification Service :3004)
-- Look at the **"Event Notifications"** box on the bottom right.
-- You will see the new notification appear with `[Status: DELIVERED]`.
-- Say to the professor:  
-  > *"This proves loose coupling and event-driven architecture. The Notification Service on port 3004 consumed the order event and logged the confirmation without blocking checkout."*
-
-### Step 5: Submit a Rating (Rating Service :3003)
-- Under **Product Rating Service**, enter Cake ID: `c1`, pick `⭐⭐⭐⭐⭐ (5)`, and click **"Submit Rating"**.
-- Click **"View Average"**.
-- Say to the professor:  
-  > *"The Rating Service on port 3003 stores reviews independently and calculates the updated average rating in real-time."*
-
----
-
-## 🐳 5. Docker & Kubernetes Commands
-
-### Run with Docker Compose:
+### Option B: Docker Compose
 ```bash
+# Build and run all microservice containers
 docker compose up --build
 ```
 
-### Deploy on Kubernetes:
+### Option C: Kubernetes Deployment
 ```bash
+# Apply namespace, deployments, and services
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/
 ```
 
 ---
 
-## 🧪 6. Automated Testing
-Run all 6 end-to-end integration tests anytime:
+## 5. End-to-End Live Demonstration Script
+
+Follow these 5 steps during your technical evaluation:
+
+1. **Catalog & Filtering (`:3001`):**
+   - Open `http://localhost:3000`.
+   - Select **"Chocolate"** in the category dropdown or search by name.
+   - *Technical highlight:* The request is routed via the API Gateway to the Catalog Microservice, which evaluates filters in-memory.
+
+2. **Basket Operations (`:3002`):**
+   - Click **`+ Add`** on cakes to populate the cart.
+   - *Technical highlight:* Demonstrates state management inside the Order Microservice with real-time recalculation of subtotal, delivery fee, and grand total.
+
+3. **Checkout & Event Publishing (`:3002`):**
+   - Click **`Complete Checkout`**.
+   - An order is generated with status `CONFIRMED` and unique ID `ORD-...`.
+   - *Technical highlight:* The Order Service finishes checkout and dispatches an asynchronous `ORDER_COMPLETED` event.
+
+4. **Event Consumption & Notification (`:3004`):**
+   - View the **Event Notifications** card on the bottom-right.
+   - The notification is received with delivery status `DELIVERED`.
+   - *Technical highlight:* Demonstrates asynchronous decoupling; checkout latency is not dependent on notification dispatch.
+
+5. **Rating & Feedback (`:3003`):**
+   - Enter Cake ID `c1`, select a rating score, and click **`Submit Rating`**.
+   - Click **`View Average`** to see dynamic recalculation.
+   - *Technical highlight:* Demonstrates independent data persistence and mathematical aggregation.
+
+---
+
+## 6. Automated Testing Suite
+
+Verify all service contracts and end-to-end flows:
 ```bash
 npm run test:e2e
 ```
-*(Tests Catalog, Basket, Checkout, Notifications, Ratings, and Health endpoints with 100% pass rate).*
+- **Test 1:** Health check probes across all 5 services.
+- **Test 2:** Catalog search and multi-criteria filter validation.
+- **Test 3:** Basket add, quantity update, and total calculations.
+- **Test 4:** Checkout execution and order persistence.
+- **Test 5:** Asynchronous notification delivery verification.
+- **Test 6:** Rating submission and average calculation.
