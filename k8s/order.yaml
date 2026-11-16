@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
+  namespace: cakedelight
 spec:
   replicas: 2
   selector:
@@ -18,13 +19,35 @@ spec:
           ports:
             - containerPort: 3002
           env:
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq.cakedelight.svc.cluster.local:5672"
             - name: NOTIFICATION_SERVICE_URL
-              value: "http://notification-service:3004"
+              value: "http://notification-service.cakedelight.svc.cluster.local:3004"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: order-service
+  namespace: cakedelight
 spec:
   selector:
     app: order

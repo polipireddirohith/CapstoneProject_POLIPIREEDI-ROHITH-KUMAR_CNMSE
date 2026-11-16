@@ -59,9 +59,11 @@ The solution addresses core engineering concerns expected of an **Advanced Appli
 |---|---|---|---|
 | **API Gateway** | `3000` | Single entry point, reverse proxy routing, hosts Client Web UI | `/*`, `/api/*`, `/health` |
 | **Cake Catalog** | `3001` | Product catalog, multi-attribute filtering (name, category, price) | `GET /cakes`, `GET /cakes/:id`, `GET /categories` |
-| **Order & Basket** | `3002` | Shopping basket operations, order checkout, event publishing | `GET /basket`, `POST /basket/items`, `POST /checkout`, `GET /orders` |
+| **Order & Basket** | `3002` | Shopping basket operations, order checkout, event publishing | `GET /basket`, `POST /basket/items`, `PUT /basket/items/:id`, `DELETE /basket/items/:id`, `POST /checkout`, `GET /orders` |
 | **Rating Service** | `3003` | Customer reviews, dynamic average score calculation | `POST /ratings`, `GET /ratings/:cakeId` |
 | **Notification** | `3004` | Event listener, order confirmation processing, delivery logging | `POST /events/order-completed`, `GET /notifications` |
+
+For detailed Data Schemas and Message Contract definitions, refer to [DATA_MODELS_AND_EVENT_CONTRACT.md](file:///c:/CapstoneProject_POLIPIREEDI%20ROHITH%20KUMAR_CNMSE/DATA_MODELS_AND_EVENT_CONTRACT.md).
 
 ---
 

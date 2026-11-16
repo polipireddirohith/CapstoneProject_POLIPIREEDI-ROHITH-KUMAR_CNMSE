@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rating-service
+  namespace: cakedelight
 spec:
   replicas: 2
   selector:
@@ -17,11 +18,31 @@ spec:
           image: rating-service
           ports:
             - containerPort: 3003
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "150m"
+              memory: "128Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: rating-service
+  namespace: cakedelight
 spec:
   selector:
     app: rating

@@ -1,6 +1,11 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    ports:
+      - "5672:5672"
+
   catalog-service:
     build: ./catalog-service
     ports:
@@ -10,6 +15,11 @@ services:
     build: ./order-service
     ports:
       - "3002:3002"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+    depends_on:
+      - rabbitmq
 
   rating-service:
     build: ./rating-service
@@ -20,6 +30,10 @@ services:
     build: ./notification-service
     ports:
       - "3004:3004"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
 
   api-gateway:
     build: ./api-gateway
@@ -30,3 +44,8 @@ services:
       - ORDER_SERVICE_URL=http://order-service:3002
       - RATING_SERVICE_URL=http://rating-service:3003
       - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+    depends_on:
+      - catalog-service
+      - order-service
+      - rating-service
+      - notification-service

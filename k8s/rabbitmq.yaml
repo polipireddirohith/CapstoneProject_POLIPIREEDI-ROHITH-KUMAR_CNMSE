@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq
+  namespace: cakedelight
 spec:
   replicas: 1
   selector:
@@ -17,11 +18,19 @@ spec:
           image: rabbitmq:3-alpine
           ports:
             - containerPort: 5672
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
+  namespace: cakedelight
 spec:
   selector:
     app: rabbitmq

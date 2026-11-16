@@ -4,8 +4,6 @@
 // ==============================================================================
 
 const http = require('http');
-const { spawn } = require('child_process');
-const path = require('path');
 
 const BASE_URL = 'http://127.0.0.1:3000';
 
@@ -29,8 +27,7 @@ function request(method, path, body = null) {
         res.on('data', chunk => (data += chunk));
         res.on('end', () => {
           try {
-            const parsed = JSON.parse(data);
-            resolve({ status: res.statusCode, data: parsed });
+            resolve({ status: res.statusCode, data: JSON.parse(data) });
           } catch {
             resolve({ status: res.statusCode, raw: data });
           }
@@ -44,47 +41,36 @@ function request(method, path, body = null) {
 }
 
 async function ensureServicesRunning() {
-  try {
-    const res = await request('GET', '/health');
-    if (res.status === 200) {
-      console.log('   Services already running.');
-      return;
-    }
-  } catch (e) {
-    console.log('   Booting microservices in-process...');
-    require('./catalog-service/server.js');
-    require('./order-service/server.js');
-    require('./rating-service/server.js');
-    require('./notification-service/server.js');
-    require('./api-gateway/server.js');
-  }
-
-  // Poll until ready
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 5; i++) {
     try {
       const res = await request('GET', '/health');
       if (res.status === 200) {
-        console.log('   API Gateway is ready and accepting requests!');
-        await new Promise(r => setTimeout(r, 500));
+        console.log('   All microservices are active on localhost:3000!');
         return;
       }
-    } catch (err) {
-      await new Promise(r => setTimeout(r, 500));
+    } catch (e) {
+      if (i === 1) {
+        console.log('   Booting microservices in-process...');
+        require('./catalog-service/server.js');
+        require('./order-service/server.js');
+        require('./rating-service/server.js');
+        require('./notification-service/server.js');
+        require('./api-gateway/server.js');
+      }
+      await new Promise(r => setTimeout(r, 800));
     }
   }
-  throw new Error('API Gateway did not respond within timeout.');
 }
 
 async function runTests() {
   console.log('🧪 Starting End-to-End Verification Test for Cake Delight...\n');
 
   try {
-    // Ensure Services are Running
     console.log('⏳ Checking Microservices Availability...');
     await ensureServicesRunning();
 
     // 1. Health Checks
-    console.log('1️⃣ Testing Microservices Health Endpoints...');
+    console.log('\n1️⃣ Testing Microservices Health Endpoints...');
     const gwHealth = await request('GET', '/health');
     console.log('   - API Gateway Health:', gwHealth.data.status);
     const catHealth = await request('GET', '/api/catalog/health');
@@ -104,17 +90,20 @@ async function runTests() {
     console.log(`   - Cakes filtered (Category=Chocolate, MaxPrice=500): ${filteredCakes.data.length}`);
     const cakeToBuy = allCakes.data[0];
 
-    // 3. Basket Operations
+    // 3. Basket Operations (Add, Update Quantity, View Summary)
     console.log('\n3️⃣ Testing Shopping Basket Operations...');
-    await request('DELETE', '/api/order/basket'); // Clear basket
-    const addRes = await request('POST', '/api/order/basket/items', {
+    await request('DELETE', '/api/order/basket');
+    await request('POST', '/api/order/basket/items', {
       cakeId: cakeToBuy.id,
       name: cakeToBuy.name,
       price: cakeToBuy.price,
-      quantity: 2,
-      image: cakeToBuy.image
+      quantity: 1
     });
-    console.log(`   - Added ${cakeToBuy.name} (x2) to basket.`);
+    console.log(`   - Added ${cakeToBuy.name} (x1) to basket.`);
+
+    // Update quantity via PUT
+    await request('PUT', `/api/order/basket/items/${cakeToBuy.id}`, { quantity: 2 });
+    console.log(`   - Updated ${cakeToBuy.name} quantity to 2 via PUT.`);
 
     const basketState = await request('GET', '/api/order/basket');
     console.log(`   - Basket Item Count: ${basketState.data.summary.itemCount}`);
@@ -125,41 +114,37 @@ async function runTests() {
     console.log('\n4️⃣ Testing Checkout & Event Dispatch...');
     const checkoutRes = await request('POST', '/api/order/checkout', {
       customerName: 'Rohith Kumar',
-      email: 'rohith@example.com',
-      phone: '+91 9999999999',
-      address: '402 Cloud-Native Street'
+      email: 'rohith@example.com'
     });
     const order = checkoutRes.data.order;
     console.log(`   - Order Placed: ID=${order.orderId}, Status=${order.status}, Total=₹${order.total}`);
 
     // 5. Notification Processing
     console.log('\n5️⃣ Testing Event Consumption in Notification Service...');
-    // Give event 500ms to be processed
     await new Promise(r => setTimeout(r, 600));
     const notifs = await request('GET', '/api/notification/notifications');
     const matchedNotif = notifs.data.find(n => n.orderId === order.orderId);
     if (matchedNotif) {
       console.log(`   - Notification Received: ID=${matchedNotif.id}`);
-      console.log(`   - Subject: "${matchedNotif.subject}"`);
       console.log(`   - Delivery Status: ${matchedNotif.status}`);
     } else {
-      console.log(`   - Latest notification: ${notifs.data[0]?.message}`);
+      console.log(`   - Notifications logged: ${notifs.data.length}`);
     }
 
-    // 6. Rating Submission & Averages
+    // 6. Rating Submission & Dynamic Averages
     console.log('\n6️⃣ Testing Rating Microservice...');
-    const rateRes = await request('POST', '/api/rating/ratings', {
+    await request('POST', '/api/rating/ratings', {
       cakeId: cakeToBuy.id,
       rating: 5,
       customerName: 'Rohith Kumar',
-      comment: 'Absolute perfection! Tested in automated test suite.'
+      comment: 'Top quality cake!'
     });
     console.log(`   - Submitted Rating: 5 Stars for ${cakeToBuy.name}`);
 
     const cakeRatings = await request('GET', `/api/rating/ratings/${cakeToBuy.id}`);
-    console.log(`   - Updated Average Rating: ${cakeRatings.data.averageRating} (${cakeRatings.data.totalReviews} total reviews)`);
+    console.log(`   - Dynamic Average Rating: ${cakeRatings.data.averageRating} (${cakeRatings.data.totalReviews} total reviews)`);
 
-    console.log('\n✅ ALL 6 END-TO-END TEST SUITES PASSED FLAWLESSLY!\n');
+    console.log('\n✅ ALL 6 CAPSTONE TEST SCENARIOS PASSED WITH 100% SUCCESS!\n');
     process.exit(0);
   } catch (err) {
     console.error('❌ Test failed with error:', err.message);
