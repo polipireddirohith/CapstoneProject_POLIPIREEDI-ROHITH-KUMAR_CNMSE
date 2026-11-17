@@ -9,129 +9,205 @@
 
 ## 1. Project Overview
 
-**Cake Delight** is an enterprise-grade, cloud-native microservices application designed around the **12-Factor App methodology**. It provides an end-to-end e-commerce customer journey: browsing artisan cakes, applying multi-attribute filters, managing shopping cart operations, completing checkout, processing asynchronous notifications, and submitting customer reviews.
+**Cake Delight** is a cloud-native microservices application that delivers an end-to-end cake e-commerce experience. It is built following the **12-Factor App methodology** and core enterprise engineering principles.
 
-The solution addresses core engineering concerns expected of an **Advanced Application Software Engineer**:
-- **Domain-Driven Service Boundaries:** 4 core business microservices + 1 API Gateway.
-- **Database-per-Service Pattern:** Isolated, service-owned persistence stores.
-- **Loose Coupling & Event-Driven Architecture:** Asynchronous order confirmation event processing.
-- **Resilience & Fault Tolerance:** Automatic fallback handling and Kubernetes health probes.
-- **Containerization & Orchestration:** Lightweight Docker packaging and production-ready Kubernetes manifests.
+**Customer Journey Supported:**
+- Browse cakes and apply filters (name, category, price)
+- Add items to shopping basket and manage quantities
+- Complete checkout and receive order confirmation
+- Submit ratings and view average scores
+- Receive asynchronous order notification events
+
+**Key Engineering Principles Demonstrated:**
+| Principle | Implementation |
+|---|---|
+| Service Boundaries | 4 independent business microservices + API Gateway |
+| Database-per-Service | Each service owns its isolated in-memory data store |
+| Loose Coupling | Asynchronous event-driven notification via HTTP event webhook |
+| Fault Tolerance | Checkout succeeds even if Notification Service is slow |
+| Containerization | Docker with lightweight Alpine Linux base image |
+| Orchestration | Kubernetes Deployments, ClusterIP and NodePort Services |
+| Health Monitoring | `/health` endpoints on every service |
 
 ---
 
-## 2. Microservices Architecture
+## 2. Architecture Diagram
 
 ```
-                    +--------------------------------+
-                    |    Client Browser / Web UI     |
-                    +--------------------------------+
-                                   | (Port 3000)
-                                   v
-                    +--------------------------------+
-                    |       API Gateway (:3000)      |
-                    |    Reverse Proxy & Routing     |
-                    +--------------------------------+
-                      /            |            \
-                     /             |             \
-       /api/catalog /   /api/order |   \api/rating\
-                   v               v               v
-            +------------+  +------------+  +------------+
-            |  Catalog   |  |   Order    |  |   Rating   |
-            |  Service   |  |  Service   |  |  Service   |
-            |  (:3001)   |  |  (:3002)   |  |  (:3003)   |
-            +------------+  +------------+  +------------+
-                                   |
-                                   | Order Completed Event (Async)
-                                   v
-                            +------------+
-                            |Notification|
-                            |  Service   |
-                            |  (:3004)   |
-                            +------------+
+         +----------------------------------+
+         |    Client Browser / Web UI       |
+         +----------------------------------+
+                         |
+                    Port 3000
+                         |
+         +----------------------------------+
+         |         API Gateway              |
+         |   (Reverse Proxy + Web Server)   |
+         +----------------------------------+
+              |          |          |
+        /api/catalog  /api/order  /api/rating  /api/notification
+              |          |          |                |
+       +--------+  +--------+  +--------+     +----------+
+       |Catalog |  | Order  |  | Rating |     |Notif     |
+       |:3001   |  | :3002  |  | :3003  |     |:3004     |
+       +--------+  +--------+  +--------+     +----------+
+                       |                           ^
+                       |   ORDER_COMPLETED event   |
+                       +---------------------------+
+                            (Async HTTP Event)
 ```
 
 ---
 
-## 3. Microservices Summary
+## 3. Services & API Endpoints
 
-| Microservice | Port | Key Responsibilities | Primary Endpoints |
-|---|---|---|---|
-| **API Gateway** | `3000` | Single entry point, reverse proxy routing, hosts Client Web UI | `/*`, `/api/*`, `/health` |
-| **Cake Catalog** | `3001` | Product catalog, multi-attribute filtering (name, category, price) | `GET /cakes`, `GET /cakes/:id`, `GET /categories` |
-| **Order & Basket** | `3002` | Shopping basket operations, order checkout, event publishing | `GET /basket`, `POST /basket/items`, `PUT /basket/items/:id`, `DELETE /basket/items/:id`, `POST /checkout`, `GET /orders` |
-| **Rating Service** | `3003` | Customer reviews, dynamic average score calculation | `POST /ratings`, `GET /ratings/:cakeId` |
-| **Notification** | `3004` | Event listener, order confirmation processing, delivery logging | `POST /events/order-completed`, `GET /notifications` |
+### API Gateway (Port 3000)
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/health` | Gateway health status |
+| `GET` | `/` | Serves Web UI dashboard |
+| `ANY` | `/api/catalog/*` | Forwards to Catalog Service |
+| `ANY` | `/api/order/*` | Forwards to Order Service |
+| `ANY` | `/api/rating/*` | Forwards to Rating Service |
+| `ANY` | `/api/notification/*` | Forwards to Notification Service |
 
-For detailed Data Schemas and Message Contract definitions, refer to [DATA_MODELS_AND_EVENT_CONTRACT.md](file:///c:/CapstoneProject_POLIPIREEDI%20ROHITH%20KUMAR_CNMSE/DATA_MODELS_AND_EVENT_CONTRACT.md).
+### Cake Catalog Service (Port 3001)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `GET` | `/cakes` | List cakes (supports `?name=`, `?category=`, `?minPrice=`, `?maxPrice=`) |
+| `GET` | `/cakes/:id` | Get single cake by ID |
+| `GET` | `/categories` | Get all unique categories |
+
+### Order & Basket Service (Port 3002)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `GET` | `/basket` | View basket items and totals |
+| `POST` | `/basket/items` | Add cake to basket |
+| `DELETE` | `/basket/items/:cakeId` | Remove item from basket |
+| `DELETE` | `/basket` | Clear entire basket |
+| `POST` | `/checkout` | Create order and trigger notification event |
+| `GET` | `/orders` | View order history |
+
+### Rating Service (Port 3003)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `POST` | `/ratings` | Submit rating (1–5 stars) |
+| `GET` | `/ratings/:cakeId` | Get reviews and average score for a cake |
+
+### Notification Service (Port 3004)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `POST` | `/events/order-completed` | Receive order completed event |
+| `GET` | `/notifications` | View all notification logs |
 
 ---
 
-## 4. How to Run the Application
+## 4. Order Completion Event Contract
 
-### Option A: Local Execution (Recommended for Live Demo)
+When checkout succeeds, the Order Service sends this event payload to the Notification Service:
+
+```json
+{
+  "orderId": "ORD-1731604500000",
+  "customerName": "Rohith Kumar",
+  "total": 950,
+  "status": "CONFIRMED"
+}
+```
+
+The Notification Service responds by logging a `DELIVERED` confirmation record.
+
+---
+
+## 5. Technology Stack
+
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js 20 |
+| Framework | Express.js |
+| Containerization | Docker (Alpine Linux) |
+| Orchestration | Kubernetes |
+| Local Dev | npm + run-local.js |
+| Multi-container | Docker Compose |
+
+---
+
+## 6. How to Run
+
+### Option A — Local (Fastest for Demo)
 ```bash
-# 1. Start all microservices concurrently
-npm start
-
-# 2. Open Web Application
-http://localhost:3000
+npm run install:all    # Install dependencies across all services
+npm start              # Start all 5 services concurrently
 ```
+Open browser: `http://localhost:3000`
 
-### Option B: Docker Compose
+### Option B — Docker Compose
 ```bash
-# Build and run all microservice containers
 docker compose up --build
 ```
 
-### Option C: Kubernetes Deployment
+### Option C — Kubernetes
 ```bash
-# Apply namespace, deployments, and services
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/
+kubectl port-forward svc/api-gateway 3000:3000
 ```
 
 ---
 
-## 5. End-to-End Live Demonstration Script
+## 7. Project Structure
 
-Follow these 5 steps during your technical evaluation:
-
-1. **Catalog & Filtering (`:3001`):**
-   - Open `http://localhost:3000`.
-   - Select **"Chocolate"** in the category dropdown or search by name.
-   - *Technical highlight:* The request is routed via the API Gateway to the Catalog Microservice, which evaluates filters in-memory.
-
-2. **Basket Operations (`:3002`):**
-   - Click **`+ Add`** on cakes to populate the cart.
-   - *Technical highlight:* Demonstrates state management inside the Order Microservice with real-time recalculation of subtotal, delivery fee, and grand total.
-
-3. **Checkout & Event Publishing (`:3002`):**
-   - Click **`Complete Checkout`**.
-   - An order is generated with status `CONFIRMED` and unique ID `ORD-...`.
-   - *Technical highlight:* The Order Service finishes checkout and dispatches an asynchronous `ORDER_COMPLETED` event.
-
-4. **Event Consumption & Notification (`:3004`):**
-   - View the **Event Notifications** card on the bottom-right.
-   - The notification is received with delivery status `DELIVERED`.
-   - *Technical highlight:* Demonstrates asynchronous decoupling; checkout latency is not dependent on notification dispatch.
-
-5. **Rating & Feedback (`:3003`):**
-   - Enter Cake ID `c1`, select a rating score, and click **`Submit Rating`**.
-   - Click **`View Average`** to see dynamic recalculation.
-   - *Technical highlight:* Demonstrates independent data persistence and mathematical aggregation.
+```
+├── api-gateway/            # Port 3000 — Reverse proxy + Web UI
+│   ├── server.js
+│   ├── public/index.html
+│   └── Dockerfile
+├── catalog-service/        # Port 3001 — Cake catalog and filtering
+│   ├── server.js
+│   └── Dockerfile
+├── order-service/          # Port 3002 — Basket, checkout, event dispatch
+│   ├── server.js
+│   └── Dockerfile
+├── rating-service/         # Port 3003 — Ratings and average calculation
+│   ├── server.js
+│   └── Dockerfile
+├── notification-service/   # Port 3004 — Order event consumer
+│   ├── server.js
+│   └── Dockerfile
+├── k8s/                    # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── catalog.yaml
+│   ├── order.yaml
+│   ├── rating.yaml
+│   ├── notification.yaml
+│   ├── gateway.yaml
+│   └── rabbitmq.yaml
+├── docker-compose.yml
+├── run-local.js            # Starts all services concurrently
+├── test-e2e.js             # End-to-end automated test suite
+└── README.md
+```
 
 ---
 
-## 6. Automated Testing Suite
+## 8. Automated Test Results
 
-Verify all service contracts and end-to-end flows:
+Run with:
 ```bash
 npm run test:e2e
 ```
-- **Test 1:** Health check probes across all 5 services.
-- **Test 2:** Catalog search and multi-criteria filter validation.
-- **Test 3:** Basket add, quantity update, and total calculations.
-- **Test 4:** Checkout execution and order persistence.
-- **Test 5:** Asynchronous notification delivery verification.
-- **Test 6:** Rating submission and average calculation.
+
+```
+1. Health Checks       — API Gateway, Catalog, Order, Rating, Notification: UP
+2. Catalog Filtering   — Filter by Category=Chocolate, MaxPrice=500: PASS
+3. Basket Operations   — Add items, recalculate totals: PASS
+4. Checkout            — Order created with status CONFIRMED: PASS
+5. Notification Event  — ORDER_COMPLETED event consumed, status DELIVERED: PASS
+6. Rating Aggregation  — 5-star rating submitted, average recalculated: PASS
+
+All 6 tests passed.
+```
