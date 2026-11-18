@@ -72,8 +72,11 @@
     <div id="rating-result"></div>
   </div>
   <div class="panel">
-    <h3>🔔 Notifications <button onclick="loadNotes()" style="float:right;padding:3px 8px;font-size:.75rem">Refresh</button></h3>
-    <div id="notifications-list"><small style="color:#94a3b8">None yet</small></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3 style="margin:0">🔔 Notifications</h3>
+      <button type="button" onclick="loadNotes()" style="padding:4px 10px;font-size:.78rem">🔄 Refresh</button>
+    </div>
+    <div id="notifications-list"><small style="color:#94a3b8">Loading…</small></div>
   </div>
 </div>
 
@@ -130,8 +133,23 @@ async function checkRating(){
 }
 
 async function loadNotes(){
-  const n=await get('/notification/notifications');
-  $('notifications-list').innerHTML=n.length?n.map(v=>`<div class="notif"><b>${v.subject||'Note'}</b><br><small style="color:#15803d">✅ ${v.status} · ${v.time||''}</small></div>`).join(''):'<small style="color:#94a3b8">None yet</small>';
+  try {
+    const n = await get('/notification/notifications');
+    $('notifications-list').innerHTML = (Array.isArray(n) && n.length)
+      ? n.map(v => `
+          <div class="notif">
+            <b>${v.subject || 'Order Confirmed'}</b>
+            ${v.message ? `<div style="margin:2px 0;color:#334155">${v.message}</div>` : ''}
+            <div style="font-size:0.75rem;color:#64748b;margin-top:2px">
+              <span style="color:#15803d;font-weight:600">✅ ${v.status}</span> &nbsp;•&nbsp; 
+              <span>${v.time || ''}</span> &nbsp;•&nbsp; 
+              <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px">${v.orderId || ''}</code>
+            </div>
+          </div>`).join('')
+      : '<small style="color:#94a3b8">No notifications yet. Place an order to see confirmation events!</small>';
+  } catch (err) {
+    $('notifications-list').innerHTML = '<small style="color:#e11d48">Error loading notifications.</small>';
+  }
 }
 
 loadCakes();loadBasket();loadNotes();
