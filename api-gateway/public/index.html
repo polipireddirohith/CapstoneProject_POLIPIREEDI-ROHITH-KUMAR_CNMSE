@@ -83,7 +83,7 @@
 <script>
 const B='/api';
 const $=id=>document.getElementById(id);
-const get=(p)=>fetch(B+p).then(r=>r.json());
+const get=(p)=>fetch(B+p,{cache:'no-store'}).then(r=>r.json());
 const post=(p,b)=>fetch(B+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 const put=(p,b)=>fetch(B+p,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 
