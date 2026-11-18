@@ -1,7 +1,5 @@
-// ==============================================================================
-// LOCAL ORCHESTRATOR FOR VIVA & QUICK DEMO
+
 // Spawns all 5 microservices concurrently without needing Docker installed!
-// ==============================================================================
 
 const { spawn } = require('child_process');
 const path = require('path');
