@@ -1,51 +1,86 @@
-version: '3.8'
-
 services:
+
   rabbitmq:
     image: rabbitmq:3-alpine
     ports:
       - "5672:5672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   catalog-service:
     build: ./catalog-service
     ports:
       - "3001:3001"
-
-  order-service:
-    build: ./order-service
-    ports:
-      - "3002:3002"
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
-    depends_on:
-      - rabbitmq
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rating-service:
     build: ./rating-service
     ports:
       - "3003:3003"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "3002:3002"
+    restart: on-failure
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3004
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   notification-service:
     build: ./notification-service
     ports:
       - "3004:3004"
+    restart: on-failure
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api-gateway:
     build: ./api-gateway
     ports:
       - "3000:3000"
+    restart: on-failure
     environment:
       - CATALOG_SERVICE_URL=http://catalog-service:3001
       - ORDER_SERVICE_URL=http://order-service:3002
       - RATING_SERVICE_URL=http://rating-service:3003
       - NOTIFICATION_SERVICE_URL=http://notification-service:3004
     depends_on:
-      - catalog-service
-      - order-service
-      - rating-service
-      - notification-service
+      catalog-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      rating-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
