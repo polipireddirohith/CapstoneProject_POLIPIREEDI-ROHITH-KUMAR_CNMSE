@@ -1,11 +1,5 @@
 # Cake Delight - Data Models, Event Contract & API Specifications
 
-**Capstone Domain:** Cloud Native Microservices Engineering  
-**Project:** Cake Delight  
-**Student:** Polipireedi Rohith Kumar  
-
----
-
 ## 1. Database Schema & Data Models (Database-per-Service)
 
 In compliance with cloud-native microservices architecture, each microservice exclusively owns its schema and persistence layer.
