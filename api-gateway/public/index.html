@@ -83,7 +83,12 @@
 <script>
 const B='/api';
 const $=id=>document.getElementById(id);
-const get=(p)=>fetch(B+p,{cache:'no-store'}).then(r=>r.json());
+const get=(p)=>{
+  const sep = p.includes('?') ? '&' : '?';
+  return fetch(B + p + sep + '_t=' + Date.now(), {
+    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+  }).then(r => r.json());
+};
 const post=(p,b)=>fetch(B+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 const put=(p,b)=>fetch(B+p,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 
