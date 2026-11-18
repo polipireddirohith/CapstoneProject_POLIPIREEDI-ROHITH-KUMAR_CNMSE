@@ -1,377 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cake Delight 🎂</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
+<html lang="en"><head><meta charset="UTF-8"><title>Cake Delight</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:#f8fafc;padding:16px}
+header{background:#e11d48;color:#fff;padding:10px 16px;border-radius:8px;margin-bottom:16px}
+.filters,.grid,.panels{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+input,select{padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:.85rem}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);overflow:hidden}
+.card img{width:100%;height:140px;object-fit:cover}
+.card-body{padding:10px}
+.badge{font-size:.7rem;background:#f1f5f9;color:#64748b;padding:2px 6px;border-radius:999px;font-family:monospace}
+.price{font-weight:700;color:#e11d48;margin:4px 0}
+.row{display:flex;gap:6px;margin-top:6px}
+.panel{flex:1;min-width:260px;background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.panel h3{color:#e11d48;margin-bottom:10px}
+.bitem{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem}
+.bqty{display:flex;align-items:center;gap:5px}
+btn,button{padding:5px 12px;background:#e11d48;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:.82rem}
+.btn-o{background:#fff;color:#e11d48;border:1.5px solid #e11d48}
+.notif{background:#f8fafc;border-left:3px solid #e11d48;padding:7px 10px;border-radius:4px;margin-bottom:5px;font-size:.82rem}
+#rating-result{margin-top:8px;background:#f0fdf4;color:#15803d;padding:7px;border-radius:6px;font-size:.82rem;display:none}
+#selected{font-size:.78rem;background:#fdf2f8;color:#be185d;padding:3px 10px;border-radius:999px;margin-bottom:8px;display:inline-block}
+</style></head><body>
+<header><h2>🎂 Cake Delight — Microservices Demo</h2></header>
 
-    header {
-      background: linear-gradient(135deg, #e11d48, #be123c);
-      color: #fff;
-      padding: 16px 28px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    header h1 { font-size: 1.5rem; }
-
-    .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
-
-    /* ── Filters ── */
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-      background: #fff;
-      padding: 14px 18px;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-    .filters input, .filters select {
-      padding: 7px 11px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    .filters input:focus, .filters select:focus { border-color: #e11d48; }
-
-    /* ── Grid ── */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-
-    /* ── Cake Card ── */
-    .cake-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.09);
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .cake-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
-    .cake-card img { width: 100%; height: 170px; object-fit: cover; }
-    .cake-info { padding: 12px 14px; }
-    .cake-info h3 { font-size: 1rem; margin-bottom: 4px; }
-    .cake-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .cake-id   { font-size: 0.72rem; background: #f1f5f9; color: #64748b; padding: 2px 7px; border-radius: 999px; font-family: monospace; }
-    .cake-cat  { font-size: 0.72rem; background: #fdf2f8; color: #be185d; padding: 2px 7px; border-radius: 999px; }
-    .cake-price { font-size: 1.1rem; font-weight: 700; color: #e11d48; margin-bottom: 6px; }
-    .cake-desc  { font-size: 0.8rem; color: #64748b; margin-bottom: 10px; line-height: 1.4; }
-    .cake-actions { display: flex; gap: 8px; }
-
-    /* ── Buttons ── */
-    .btn {
-      padding: 6px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: opacity 0.15s;
-    }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary  { background: #e11d48; color: #fff; flex: 1; }
-    .btn-outline  { background: #fff; color: #e11d48; border: 1.5px solid #e11d48; flex: 1; }
-    .btn-sm       { padding: 3px 10px; font-size: 0.8rem; background: #e11d48; color: #fff; border-radius: 5px; border: none; cursor: pointer; }
-
-    /* ── Layout panels ── */
-    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
-    @media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
-
-    .panel {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.09);
-      padding: 18px 20px;
-    }
-    .panel h2 { font-size: 1rem; margin-bottom: 14px; color: #e11d48; display: flex; align-items: center; gap: 6px; }
-
-    /* ── Basket ── */
-    .basket-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
-    .basket-qty  { display: flex; align-items: center; gap: 6px; }
-    .basket-qty button { width: 24px; height: 24px; border-radius: 50%; border: none; background: #e11d48; color: #fff; cursor: pointer; font-size: 1rem; line-height: 1; }
-    .basket-total { font-weight: 700; margin-top: 10px; font-size: 0.95rem; }
-    .basket-empty { color: #94a3b8; font-size: 0.88rem; }
-
-    /* ── Rating ── */
-    .rating-form { display: flex; flex-direction: column; gap: 8px; }
-    .rating-form label { font-size: 0.82rem; color: #64748b; }
-    .rating-form input, .rating-form select, .rating-form textarea {
-      padding: 7px 10px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      outline: none;
-      font-family: inherit;
-    }
-    .rating-form input:focus, .rating-form select:focus { border-color: #e11d48; }
-    #selected-cake-badge {
-      display: inline-block;
-      background: #fdf2f8;
-      color: #be185d;
-      border-radius: 999px;
-      padding: 3px 12px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    #rating-result {
-      margin-top: 10px;
-      background: #f0fdf4;
-      color: #15803d;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      display: none;
-    }
-
-    /* ── Notifications ── */
-    .notif-item {
-      padding: 8px 10px;
-      background: #f8fafc;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      font-size: 0.83rem;
-      border-left: 3px solid #e11d48;
-    }
-    .notif-item .notif-subject { font-weight: 600; margin-bottom: 2px; }
-    .notif-item .notif-status  { color: #15803d; font-size: 0.75rem; }
-
-    .section-title { font-size: 1.15rem; font-weight: 700; margin: 28px 0 14px; color: #1e293b; }
-
-    .toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: #1e293b; color: #fff;
-      padding: 10px 18px; border-radius: 8px;
-      font-size: 0.88rem; opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: 999;
-    }
-    .toast.show { opacity: 1; }
-  </style>
-</head>
-<body>
-
-<header>
-  <span style="font-size:2rem">🎂</span>
-  <h1>Cake Delight — Microservices Demo</h1>
-</header>
-
-<div class="container">
-
-  <!-- ── Filters ── -->
-  <div class="filters">
-    <input id="search"   placeholder="🔍 Search cakes…"  oninput="loadCakes()" style="flex:2;min-width:160px">
-    <select id="cat"     onchange="loadCakes()" style="flex:1;min-width:130px">
-      <option>All</option>
-      <option>Chocolate</option>
-      <option>Velvet</option>
-      <option>Cheesecake</option>
-    </select>
-    <input id="maxPrice" placeholder="Max Price ₹" type="number" oninput="loadCakes()" style="flex:1;min-width:120px">
-  </div>
-
-  <!-- ── Cake Grid ── -->
-  <div class="section-title">🍰 Cake Catalog</div>
-  <div class="grid" id="cake-list">
-    <div style="color:#94a3b8;font-size:0.9rem">Loading cakes…</div>
-  </div>
-
-  <!-- ── Bottom Panels ── -->
-  <div class="panels">
-
-    <!-- Basket -->
-    <div class="panel">
-      <h2>🛒 Shopping Basket</h2>
-      <div id="basket-items"><span class="basket-empty">Your basket is empty.</span></div>
-      <div class="basket-total" id="basket-total" style="margin-top:12px">Total: ₹0</div>
-      <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="checkout()">✅ Checkout</button>
-    </div>
-
-    <!-- Rating -->
-    <div class="panel">
-      <h2>⭐ Rate a Cake</h2>
-      <div id="selected-cake-badge">No cake selected — click "Rate" on a card</div>
-      <div class="rating-form">
-        <input type="hidden" id="rateCakeId" value="">
-        <label>Star Rating</label>
-        <select id="rateScore">
-          <option value="5">⭐⭐⭐⭐⭐ — 5 Stars</option>
-          <option value="4">⭐⭐⭐⭐ — 4 Stars</option>
-          <option value="3">⭐⭐⭐ — 3 Stars</option>
-          <option value="2">⭐⭐ — 2 Stars</option>
-          <option value="1">⭐ — 1 Star</option>
-        </select>
-        <label>Your Name</label>
-        <input id="reviewerName" placeholder="Enter your name">
-        <label>Comment</label>
-        <input id="reviewComment" placeholder="Write a short review…">
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <button class="btn btn-primary" onclick="submitRating()">Submit Rating</button>
-          <button class="btn btn-outline"  onclick="checkRating()">View Average</button>
-        </div>
-      </div>
-      <div id="rating-result"></div>
-    </div>
-
-  </div>
-
-  <!-- Notifications -->
-  <div class="panel" style="margin-top:20px">
-    <h2>🔔 Notifications
-      <button class="btn-sm" onclick="loadNotes()" style="margin-left:auto">Refresh</button>
-    </h2>
-    <div id="notifications-list"><span class="basket-empty">No notifications yet. Place an order!</span></div>
-  </div>
-
+<div class="filters">
+  <input id="search" placeholder="🔍 Search" oninput="loadCakes()">
+  <select id="cat" onchange="loadCakes()"><option>All</option><option>Chocolate</option><option>Velvet</option><option>Cheesecake</option></select>
+  <input id="maxPrice" placeholder="Max ₹" type="number" oninput="loadCakes()" style="width:90px">
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="grid" id="cake-list">Loading…</div>
+
+<div class="panels">
+  <div class="panel">
+    <h3>🛒 Basket</h3>
+    <div id="basket-items"><small style="color:#94a3b8">Empty</small></div>
+    <div id="basket-total" style="font-weight:700;margin-top:8px">Total: ₹0</div>
+    <button style="margin-top:10px;width:100%" onclick="checkout()">✅ Checkout</button>
+  </div>
+  <div class="panel">
+    <h3>⭐ Rate a Cake</h3>
+    <div id="selected">No cake selected — click ⭐ Rate on a card</div>
+    <input type="hidden" id="rateCakeId">
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <select id="rateScore"><option value="5">⭐⭐⭐⭐⭐ 5 Stars</option><option value="4">⭐⭐⭐⭐ 4 Stars</option><option value="3">⭐⭐⭐ 3 Stars</option><option value="2">⭐⭐ 2 Stars</option><option value="1">⭐ 1 Star</option></select>
+      <input id="reviewerName" placeholder="Your name">
+      <input id="reviewComment" placeholder="Comment">
+      <div class="row"><button onclick="submitRating()">Submit</button><button class="btn-o" onclick="checkRating()">View Avg</button></div>
+    </div>
+    <div id="rating-result"></div>
+  </div>
+  <div class="panel">
+    <h3>🔔 Notifications <button onclick="loadNotes()" style="float:right;padding:3px 8px;font-size:.75rem">Refresh</button></h3>
+    <div id="notifications-list"><small style="color:#94a3b8">None yet</small></div>
+  </div>
+</div>
 
 <script>
-  const BASE = '/api';
+const B='/api';
+const $=id=>document.getElementById(id);
+const get=(p)=>fetch(B+p).then(r=>r.json());
+const post=(p,b)=>fetch(B+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
+const put=(p,b)=>fetch(B+p,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.json());
 
-  async function fetchJSON(method, path, body) {
-    const res = await fetch(path, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : null
-    });
-    return res.json();
-  }
+async function loadCakes(){
+  const q=`/catalog/cakes?name=${encodeURIComponent($('search').value)}&category=${encodeURIComponent($('cat').value)}${$('maxPrice').value?'&maxPrice='+$('maxPrice').value:''}`;
+  const cakes=await get(q);
+  $('cake-list').innerHTML=cakes.map(c=>`
+    <div class="card">
+      <img src="${c.image}" alt="${c.name}">
+      <div class="card-body">
+        <span class="badge">ID: ${c.id}</span> <span class="badge">${c.category}</span>
+        <div class="price">₹${c.price}</div>
+        <b>${c.name}</b>
+        <div class="row">
+          <button onclick="add('${c.id}','${c.name}',${c.price})">🛒 Add</button>
+          <button class="btn-o" onclick="rate('${c.id}','${c.name}')">⭐ Rate</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-  }
+async function add(id,name,price){await post('/order/basket/items',{cakeId:id,name,price,quantity:1});loadBasket();}
+async function loadBasket(){
+  const d=await get('/order/basket');
+  $('basket-items').innerHTML=d.items?.length?d.items.map(i=>`<div class="bitem"><span><b>${i.name}</b> <small style="color:#94a3b8">(${i.cakeId})</small></span><div class="bqty"><button onclick="chg('${i.cakeId}',${i.quantity-1})">−</button>x${i.quantity}<button onclick="chg('${i.cakeId}',${i.quantity+1})">+</button></div></div>`).join(''):'<small style="color:#94a3b8">Empty</small>';
+  $('basket-total').innerHTML=`Subtotal ₹${d.summary?.subtotal||0} + Delivery ₹${d.summary?.deliveryFee||0} = <span style="color:#e11d48">₹${d.summary?.total||0}</span>`;
+}
+async function chg(id,q){await put(`/order/basket/items/${id}`,{quantity:q});loadBasket();}
+async function checkout(){
+  const name=prompt('Your name:','Rohith Kumar')||'Customer';
+  const email=prompt('Your email:','customer@example.com')||'customer@example.com';
+  const o=await post('/order/checkout',{customerName:name,email});
+  o.order?alert(`✅ Order ${o.order.orderId} confirmed! ₹${o.order.total}`):alert('❌ '+(o.error||'Failed'));
+  loadBasket();setTimeout(loadNotes,800);
+}
 
-  // ── Catalog ──
-  async function loadCakes() {
-    const name     = encodeURIComponent(document.getElementById('search').value);
-    const category = encodeURIComponent(document.getElementById('cat').value);
-    const maxPrice = document.getElementById('maxPrice').value;
-    let url = `${BASE}/catalog/cakes?name=${name}&category=${category}`;
-    if (maxPrice) url += `&maxPrice=${maxPrice}`;
+function rate(id,name){$('rateCakeId').value=id;$('selected').textContent=`Rating: ${name} (${id})`;$('rating-result').style.display='none';}
+async function submitRating(){
+  const id=$('rateCakeId').value||'c1';
+  await post('/rating/ratings',{cakeId:id,rating:Number($('rateScore').value),customerName:$('reviewerName').value||'Guest',comment:$('reviewComment').value||''});
+  checkRating();
+}
+async function checkRating(){
+  const id=$('rateCakeId').value||'c1';
+  const r=await get(`/rating/ratings/${id}`);
+  $('rating-result').style.display='block';
+  $('rating-result').innerHTML=`⭐ Avg: <b>${r.averageRating}</b> | ${r.totalReviews} review(s) for <code>${r.cakeId}</code>`;
+}
 
-    const cakes = await fetchJSON('GET', url);
-    document.getElementById('cake-list').innerHTML = cakes.length
-      ? cakes.map(c => `
-          <div class="cake-card">
-            <img src="${c.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300'}"
-                 alt="${c.name}" onerror="this.src='https://via.placeholder.com/300x170?text=🎂'">
-            <div class="cake-info">
-              <div class="cake-meta">
-                <span class="cake-id">ID: ${c.id}</span>
-                <span class="cake-cat">${c.category}</span>
-              </div>
-              <h3>${c.name}</h3>
-              <div class="cake-price">₹${c.price}</div>
-              <div class="cake-desc">${c.description || ''}</div>
-              <div class="cake-actions">
-                <button class="btn btn-primary" onclick="add('${c.id}','${c.name}',${c.price})">🛒 Add to Basket</button>
-                <button class="btn btn-outline"  onclick="selectForRating('${c.id}','${c.name}')">⭐ Rate</button>
-              </div>
-            </div>
-          </div>`).join('')
-      : '<div style="color:#94a3b8;font-size:0.9rem">No cakes found.</div>';
-  }
+async function loadNotes(){
+  const n=await get('/notification/notifications');
+  $('notifications-list').innerHTML=n.length?n.map(v=>`<div class="notif"><b>${v.subject||'Note'}</b><br><small style="color:#15803d">✅ ${v.status} · ${v.time||''}</small></div>`).join(''):'<small style="color:#94a3b8">None yet</small>';
+}
 
-  // ── Basket ──
-  async function add(id, name, price) {
-    await fetchJSON('POST', `${BASE}/order/basket/items`, { cakeId: id, name, price, quantity: 1 });
-    showToast(`✅ ${name} added to basket!`);
-    loadBasket();
-  }
-
-  async function loadBasket() {
-    const d = await fetchJSON('GET', `${BASE}/order/basket`);
-    document.getElementById('basket-items').innerHTML = d.items && d.items.length
-      ? d.items.map(i => `
-          <div class="basket-item">
-            <span><b>${i.name}</b> <small style="color:#94a3b8">(${i.cakeId})</small></span>
-            <div class="basket-qty">
-              <button onclick="chg('${i.cakeId}',${i.quantity - 1})">−</button>
-              <span>x${i.quantity}</span>
-              <button onclick="chg('${i.cakeId}',${i.quantity + 1})">+</button>
-            </div>
-          </div>`).join('')
-      : '<span class="basket-empty">Your basket is empty.</span>';
-    document.getElementById('basket-total').innerHTML =
-      `<div>Subtotal: ₹${d.summary?.subtotal || 0}</div>
-       <div>Delivery: ₹${d.summary?.deliveryFee || 0}</div>
-       <div style="font-size:1rem;color:#e11d48">Grand Total: ₹${d.summary?.total || 0}</div>`;
-  }
-
-  async function chg(id, qty) {
-    await fetchJSON('PUT', `${BASE}/order/basket/items/${id}`, { quantity: qty });
-    loadBasket();
-  }
-
-  async function checkout() {
-    const name = prompt('Enter your name for the order:', 'Rohith Kumar') || 'Customer';
-    const email = prompt('Enter your email:', 'customer@example.com') || 'customer@example.com';
-    const o = await fetchJSON('POST', `${BASE}/order/checkout`, { customerName: name, email });
-    if (o.order) {
-      showToast(`🎉 Order ${o.order.orderId} confirmed! Total ₹${o.order.total}`);
-      loadBasket();
-      setTimeout(loadNotes, 800);
-    } else {
-      showToast('❌ ' + (o.error || 'Checkout failed'));
-    }
-  }
-
-  // ── Rating ──
-  function selectForRating(cakeId, cakeName) {
-    document.getElementById('rateCakeId').value = cakeId;
-    document.getElementById('selected-cake-badge').textContent = `Rating: ${cakeName} (${cakeId})`;
-    document.getElementById('rating-result').style.display = 'none';
-    document.querySelector('.panel:last-of-type') ;
-    // Scroll to rating panel
-    document.getElementById('rateCakeId').closest('.panel')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  async function submitRating() {
-    const id      = document.getElementById('rateCakeId').value || 'c1';
-    const score   = document.getElementById('rateScore').value;
-    const name    = document.getElementById('reviewerName').value || 'Anonymous';
-    const comment = document.getElementById('reviewComment').value || '';
-    await fetchJSON('POST', `${BASE}/rating/ratings`, { cakeId: id, rating: Number(score), customerName: name, comment });
-    showToast('⭐ Rating submitted!');
-    checkRating();
-  }
-
-  async function checkRating() {
-    const id = document.getElementById('rateCakeId').value || 'c1';
-    const r  = await fetchJSON('GET', `${BASE}/rating/ratings/${id}`);
-    const el = document.getElementById('rating-result');
-    el.style.display = 'block';
-    el.innerHTML = `⭐ Average: <b>${r.averageRating}</b> stars &nbsp;|&nbsp; ${r.totalReviews} review(s) for cake <code>${r.cakeId}</code>`;
-  }
-
-  // ── Notifications ──
-  async function loadNotes() {
-    const notes = await fetchJSON('GET', `${BASE}/notification/notifications`);
-    document.getElementById('notifications-list').innerHTML = notes.length
-      ? notes.map(v => `
-          <div class="notif-item">
-            <div class="notif-subject">${v.subject || 'Notification'}</div>
-            <div>${v.message || ''}</div>
-            <div class="notif-status">✅ ${v.status} &nbsp;·&nbsp; ${v.time || ''}</div>
-          </div>`).join('')
-      : '<span class="basket-empty">No notifications yet. Place an order!</span>';
-  }
-
-  // ── Init ──
-  loadCakes();
-  loadBasket();
-  loadNotes();
+loadCakes();loadBasket();loadNotes();
 </script>
-</body>
-</html>
+</body></html>
