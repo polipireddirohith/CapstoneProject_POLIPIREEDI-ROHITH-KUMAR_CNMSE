@@ -6,6 +6,11 @@ const path = require('path');
 const app = express();
 
 app.use(cors());
+app.set('etag', false);
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+});
 
 // Serve frontend UI
 app.use(express.static(path.join(__dirname, 'public')));
