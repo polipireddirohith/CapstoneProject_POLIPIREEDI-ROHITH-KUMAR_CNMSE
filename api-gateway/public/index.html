@@ -1,26 +1,46 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>Cake Delight</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
-body{background:#f8fafc;padding:16px}
-header{background:#e11d48;color:#fff;padding:10px 16px;border-radius:8px;margin-bottom:16px}
-.filters,.grid,.panels{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-input,select{padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:.85rem}
-.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);overflow:hidden}
-.card-body{padding:10px}
-.badge{font-size:.7rem;background:#f1f5f9;color:#64748b;padding:2px 6px;border-radius:999px;font-family:monospace}
-.price{font-weight:700;color:#e11d48;margin:4px 0}
-.row{display:flex;gap:6px;margin-top:6px}
-.panel{flex:1;min-width:260px;background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.panel h3{color:#e11d48;margin-bottom:10px}
-.bitem{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem}
-.bqty{display:flex;align-items:center;gap:5px}
-btn,button{padding:5px 12px;background:#e11d48;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:.82rem}
-.btn-o{background:#fff;color:#e11d48;border:1.5px solid #e11d48}
-.notif{background:#f8fafc;border-left:3px solid #e11d48;padding:7px 10px;border-radius:4px;margin-bottom:5px;font-size:.82rem}
-#rating-result{margin-top:8px;background:#f0fdf4;color:#15803d;padding:7px;border-radius:6px;font-size:.82rem;display:none}
-#selected{font-size:.78rem;background:#fdf2f8;color:#be185d;padding:3px 10px;border-radius:999px;margin-bottom:8px;display:inline-block}
+  /* Reset & base */
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+  body { background: #f8fafc; padding: 16px; }
+
+  /* Header bar */
+  header { background: #e11d48; color: #fff; padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; }
+
+  /* Filter row & card grid */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .grid    { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  input, select { padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: .85rem; }
+
+  /* Cake card */
+  .card      { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+  .card-body { padding: 10px; }
+  .badge     { font-size: .7rem; background: #f1f5f9; color: #64748b; padding: 2px 6px; border-radius: 999px; font-family: monospace; }
+  .price     { font-weight: 700; color: #e11d48; margin: 4px 0; }
+  .row       { display: flex; gap: 6px; margin-top: 6px; }
+
+  /* Bottom panels */
+  .panels    { display: flex; gap: 10px; flex-wrap: wrap; }
+  .panel     { flex: 1; min-width: 260px; background: #fff; border-radius: 8px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+  .panel h3  { color: #e11d48; margin-bottom: 10px; }
+
+  /* Basket rows */
+  .bitem { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9; font-size: .85rem; }
+  .bqty  { display: flex; align-items: center; gap: 5px; }
+
+  /* Buttons */
+  button  { padding: 5px 12px; background: #e11d48; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: .82rem; }
+  .btn-o  { background: #fff; color: #e11d48; border: 1.5px solid #e11d48; }
+
+  /* Notification card */
+  .notif { background: #f8fafc; border-left: 3px solid #e11d48; padding: 7px 10px; border-radius: 4px; margin-bottom: 5px; font-size: .82rem; }
+
+  /* Rating result box */
+  #rating-result { margin-top: 8px; background: #f0fdf4; color: #15803d; padding: 7px; border-radius: 6px; font-size: .82rem; display: none; }
+
+  /* Selected cake badge */
+  #selected { font-size: .78rem; background: #fdf2f8; color: #be185d; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; display: inline-block; }
 </style></head><body>
 <header><h2>🎂 Cake Delight</h2></header>
 
