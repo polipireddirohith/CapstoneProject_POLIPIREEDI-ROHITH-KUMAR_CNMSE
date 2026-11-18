@@ -6,6 +6,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==============================================================================
+// DATABASE INTEGRATION (Polyglot Persistence: MongoDB via Mongoose)
+// To activate: 1) npm i mongoose  2) uncomment the lines below
+// const mongoose = require('mongoose');
+// mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/catalog_db');
+// const Cake = mongoose.model('Cake', new mongoose.Schema({ name: String, category: String, price: Number, image: String }));
+// ==============================================================================
+
 // In-Memory Database with all required product attributes:
 // name, description, category, price, availability, and image reference
 let cakes = [

@@ -7,6 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==============================================================================
+// DATABASE INTEGRATION (Polyglot Persistence: PostgreSQL / SQL for ACID Compliance)
+// To activate: 1) npm i pg  2) uncomment the lines below
+// const { Pool } = require('pg');
+// const db = new Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://user:pass@127.0.0.1:5432/orders_db' });
+// Example: await db.query('INSERT INTO orders(order_id, total, status) VALUES($1, $2, $3)', [order.orderId, order.total, 'CONFIRMED']);
+// ==============================================================================
+
 let basket = [];
 let orders = [];
 const NOTIF_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://127.0.0.1:3004';

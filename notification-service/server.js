@@ -7,6 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==============================================================================
+// DATABASE INTEGRATION (Polyglot Persistence: MongoDB / Redis for Notification Logs)
+// To activate: 1) npm i mongoose  2) uncomment the lines below
+// const mongoose = require('mongoose');
+// mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/notifications_db');
+// const Notif = mongoose.model('Notification', new mongoose.Schema({ orderId: String, subject: String, status: String, time: String }));
+// ==============================================================================
+
 let notifications = [
   { id: 'notif-1', orderId: 'ORD-101', subject: 'Order #ORD-101 Confirmed', status: 'DELIVERED', time: '10:00:00 AM' }
 ];

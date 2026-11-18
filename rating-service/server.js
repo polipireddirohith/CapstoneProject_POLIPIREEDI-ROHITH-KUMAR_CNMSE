@@ -6,6 +6,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==============================================================================
+// DATABASE INTEGRATION (Polyglot Persistence: MongoDB for Reviews)
+// To activate: 1) npm i mongoose  2) uncomment the lines below
+// const mongoose = require('mongoose');
+// mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ratings_db');
+// const Review = mongoose.model('Review', new mongoose.Schema({ cakeId: String, rating: Number, customerName: String, comment: String }));
+// ==============================================================================
+
 let ratings = [
   { cakeId: 'c1', customerName: 'Aarav', rating: 5, comment: 'Great taste!' },
   { cakeId: 'c1', customerName: 'Sneha', rating: 4, comment: 'Very soft' }
