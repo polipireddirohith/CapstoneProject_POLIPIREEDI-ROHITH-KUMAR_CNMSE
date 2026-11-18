@@ -7,6 +7,6 @@ package-lock.json
 .env
 dist/
 build/
-# Local viva notes (kept private so professors don't see)
+
 *VIVA*.md
 *viva*.md
