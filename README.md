@@ -1,12 +1,5 @@
 # Cake Delight - Cloud Native Microservices Application
 
-**Capstone Project:** Cloud Native Microservices Engineering  
-**Candidate Name:** Polipireedi Rohith Kumar  
-**Target Role:** Advanced Application Software Engineer (AASE)  
-**Company:** Accenture  
-
----
-
 ## 1. Project Overview
 
 **Cake Delight** is a cloud-native microservices application that delivers an end-to-end cake e-commerce experience. It is built following the **12-Factor App methodology** and core enterprise engineering principles.
