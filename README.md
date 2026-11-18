@@ -131,7 +131,7 @@ The Notification Service responds by logging a `DELIVERED` confirmation record.
 
 ## 6. How to Run
 
-### Option A — Local (Fastest for Demo)
+### Option A — Local 
 ```bash
 npm run install:all    # Install dependencies across all services
 npm start              # Start all 5 services concurrently
